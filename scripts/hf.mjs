@@ -16,8 +16,8 @@ const isWin = process.platform === "win32";
 // 这样即使终端或 AI 工具还没重启、没读到新的 PATH，也能找到它们
 const KIT = join(homedir(), ".video-kit");
 const KIT_PATHS = isWin
-  ? [join(KIT, "bin"), join(KIT, "node")]
-  : [join(KIT, "bin"), join(KIT, "node", "bin")];
+  ? [join(KIT, "bin"), join(KIT, "npm-global"), join(KIT, "node")]
+  : [join(KIT, "bin"), join(KIT, "npm-global", "bin"), join(KIT, "node", "bin")];
 process.env.PATH = [...KIT_PATHS, process.env.PATH].join(isWin ? ";" : ":");
 // 预先下载好的渲染浏览器（国内网络下 HyperFrames 自己下载常常失败）
 const chromeFile = join(KIT, "chrome-path.txt");
@@ -58,7 +58,9 @@ function projectPin() {
 
 // Meet U 视频工作室（安杰开发）：汉化版编辑器，Meet U 公司内部使用。设 HF_OFFICIAL=1 可改用官方英文版。
 const MEETU_PKG =
-  "https://github.com/e7naq3y/meetu-video-studio/releases/download/v0.8.137-meetu.1/meetu-hyperframes-0.8.137-meetu.1.tgz";
+  "https://github.com/e7naq3y/meetu-video-studio/releases/download/v0.8.137-meetu.2/meetu-hyperframes-0.8.137-meetu.2.tgz";
+// 一键安装脚本已把汉化版装成本机命令时，直接用它（不经过 npx，更快，也不会误下官方版）
+const MEETU_BIN = isWin ? join(KIT, "npm-global", "hyperframes.cmd") : join(KIT, "npm-global", "bin", "hyperframes");
 const useMeetU = !process.env.HF_OFFICIAL && !process.env.HF_VERSION;
 
 let version = useMeetU ? null : process.env.HF_VERSION || projectPin();
@@ -78,7 +80,8 @@ if (args.length === 0) {
 
 // Windows 上调用 npx.cmd 必须经过 shell，而 shell 不会自动给参数加引号，所以带空格的参数要手动包一层
 const quote = (s) => (isWin && /[\s&|<>^]/.test(s) ? `"${s.replace(/"/g, '\\"')}"` : s);
-const r = spawnSync("npx", [...pkgArgs, ...args].map(quote), {
+const local = useMeetU && existsSync(MEETU_BIN);
+const r = spawnSync(local ? MEETU_BIN : "npx", (local ? args : [...pkgArgs, ...args]).map(quote), {
   stdio: "inherit",
   shell: isWin,
   // 公司内部使用：关闭向上游发送的使用统计

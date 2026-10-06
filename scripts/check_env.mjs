@@ -45,6 +45,13 @@ const edge = existsSync(venvPy) ? sh(venvPy, ["-c", "import edge_tts;print(edge_
 check("edge-tts 中文配音", !!edge, edge ? `版本 ${edge}，Python: ${venvPy}` : "未安装",
   isWin ? "重新运行 scripts\\bootstrap-windows.ps1" : "重新运行 scripts/bootstrap-mac.sh");
 
+// Meet U 视频工作室：本机的 hyperframes 命令必须是汉化版，否则 AI 照官方文档操作会打开英文版
+const meetuPkg = isWin ? join(KIT, "npm-global", "node_modules", "hyperframes") : join(KIT, "npm-global", "lib", "node_modules", "hyperframes");
+const meetuOk = existsSync(join(meetuPkg, "NOTICE-MEETU.md"));
+const meetuVer = meetuOk ? JSON.parse(readFileSync(join(meetuPkg, "package.json"), "utf8")).version : "";
+check("Meet U 视频工作室", meetuOk, meetuOk ? `已安装为 hyperframes 命令（${meetuVer}）` : "未安装",
+  isWin ? "重新运行 scripts\\bootstrap-windows.ps1" : "重新运行 scripts/bootstrap-mac.sh");
+
 // HyperFrames skills：独立安装（Claude / Codex）或插件版，任一存在即可
 const skillDirs = [
   [join(home, ".claude", "skills", "hyperframes", "SKILL.md"), "Claude Code"],

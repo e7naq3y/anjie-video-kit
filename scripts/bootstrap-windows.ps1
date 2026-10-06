@@ -18,9 +18,10 @@ $KIT = Join-Path $HOME ".video-kit"
 $BIN = Join-Path $KIT "bin"
 $SKILL_DIR = Split-Path -Parent $PSScriptRoot
 New-Item -ItemType Directory -Force -Path $BIN | Out-Null
-$env:Path = "$BIN;$KIT\node;$env:Path"
+$env:Path = "$BIN;$KIT\npm-global;$KIT\node;$env:Path"
 
-$HF_RELEASE = "https://github.com/e7naq3y/meetu-video-studio/releases/download/v0.8.137-meetu.1"
+$HF_RELEASE = "https://github.com/e7naq3y/meetu-video-studio/releases/download/v0.8.137-meetu.2"
+$HF_PKG = "$HF_RELEASE/meetu-hyperframes-0.8.137-meetu.2.tgz"
 $FF_RELEASE = "https://github.com/eugeneware/ffmpeg-static/releases/download/b6.1.1"
 $CHROME_VERSION = "152.0.7977.30"
 
@@ -169,18 +170,27 @@ if (Download "$HF_RELEASE/hyperframes-skills-0.8.137.zip" $zip) {
   } else { Bad "解压后找不到 skills" }
 } else { Bad "skills 下载失败" }
 
-# ---------- 预先下载 Meet U 视频工作室 ----------
+# ---------- Meet U 视频工作室：装成本机的 hyperframes 命令 ----------
+# 装成全局命令后，不管是 AI 照 HyperFrames 文档运行 `hyperframes ...`，还是项目里的 npm run dev，
+# 打开的都是汉化版。--prefix 装在用户目录，不需要管理员权限。
 Step "Meet U 视频工作室（中文编辑器）"
-if ((Get-Command node -ErrorAction SilentlyContinue) -and (Works node @((Join-Path $SKILL_DIR "scripts\hf.mjs"), "--version"))) {
+$npmg = Join-Path $KIT "npm-global"
+$meetuPkg = Join-Path $npmg "node_modules\hyperframes"
+if ((Test-Path (Join-Path $meetuPkg "NOTICE-MEETU.md")) -and ((Get-Content (Join-Path $meetuPkg "package.json") -Raw) -match '"0\.8\.137-meetu\.2"')) {
   Ok "已就绪"
-} else { Bad "下载失败" }
+} elseif (Get-Command npm -ErrorAction SilentlyContinue) {
+  & npm install -g --prefix $npmg $HF_PKG *> (Join-Path $KIT "meetu-install.log")
+  if ((Test-Path (Join-Path $npmg "hyperframes.cmd")) -and (Test-Path (Join-Path $meetuPkg "NOTICE-MEETU.md"))) {
+    Ok "已安装为 hyperframes 命令"
+  } else { Bad "安装失败，日志：$KIT\meetu-install.log" }
+} else { Bad "缺少 Node.js，无法安装" }
 
 # ---------- 写入当前用户的 PATH（不需要管理员权限） ----------
 Step "配置环境变量"
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if (-not $userPath) { $userPath = "" }
 $changed = $false
-foreach ($p in @($BIN, (Join-Path $KIT "node"))) {
+foreach ($p in @($BIN, (Join-Path $KIT "npm-global"), (Join-Path $KIT "node"))) {
   if (($userPath -split ";") -notcontains $p) { $userPath = "$p;$userPath"; $changed = $true }
 }
 if ($changed) { [Environment]::SetEnvironmentVariable("Path", $userPath.TrimEnd(";"), "User") }

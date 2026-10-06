@@ -19,7 +19,7 @@
 | Python 3.12 + edge-tts | `.video-kit/python/` 和 `.video-kit/venv/` | 由 uv 下载独立版 Python，再从 PyPI 装 edge-tts | `.video-kit/venv/bin/python -c "import edge_tts"`（Windows 是 `venv\Scripts\python.exe`） |
 | 渲染用 Chrome | `.video-kit/chrome/<版本>/` | Google 官方 Chrome for Testing | `.video-kit/chrome-path.txt` 里写的路径存在 |
 | HyperFrames skills | `~/.claude/skills/` 和 `~/.agents/skills/` | meetu-video-studio 的 Release 附件 `hyperframes-skills-0.8.137.zip` | 两处都有 `hyperframes/SKILL.md` |
-| Meet U 视频工作室 | npm 缓存（由 npx 管理） | meetu-video-studio 的 Release 附件 | `node scripts/hf.mjs --version` 能输出版本号 |
+| Meet U 视频工作室 | `.video-kit/npm-global/`，装成本机的 `hyperframes` 命令 | meetu-video-studio 的 Release 附件（`npm install -g --prefix`，不需要管理员权限） | `hyperframes --version` 能运行，且 `npm-global` 里的 hyperframes 包带有 `NOTICE-MEETU.md` |
 
 ## 常见失败
 

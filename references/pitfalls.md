@@ -87,3 +87,9 @@ edge-tts 偶尔会读错多音字。比如单独一个"行"字（衣食住"行"�
 原因：文字是用 JS 生成的。Studio 只能编辑写在 HTML 里的静态文字。
 
 解决：文字全部直接写进 HTML。逐字动画的 `<span>` 也直接写在 HTML 里，再用 GSAP 选中做动画。
+
+## 12. 打开的编辑器是英文的，还弹出 "Meet Framey" 广告
+
+原因：运行了 `npx hyperframes ...`。npx 会去下载官方英文版，而不是使用本机装好的 Meet U 视频工作室。
+
+解决：先关掉这个预览（`hyperframes preview <项目路径> --stop`），再用 `hyperframes preview --background` 重新打开。以后都直接用 `hyperframes` 命令。如果 `hyperframes` 命令也打开了英文版，说明汉化版没装好，重新运行一键安装脚本。

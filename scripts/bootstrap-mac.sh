@@ -13,10 +13,11 @@ KIT="$HOME/.video-kit"
 BIN="$KIT/bin"
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 mkdir -p "$BIN"
-export PATH="$BIN:$KIT/node/bin:$PATH"
+export PATH="$BIN:$KIT/npm-global/bin:$KIT/node/bin:$PATH"
 
 # 与 Meet U 视频工作室锁定的 HyperFrames 版本保持一致
-HF_RELEASE=https://github.com/e7naq3y/meetu-video-studio/releases/download/v0.8.137-meetu.1
+HF_RELEASE=https://github.com/e7naq3y/meetu-video-studio/releases/download/v0.8.137-meetu.2
+HF_PKG="$HF_RELEASE/meetu-hyperframes-0.8.137-meetu.2.tgz"
 FF_RELEASE=https://github.com/eugeneware/ffmpeg-static/releases/download/b6.1.1
 CHROME_VERSION=152.0.7977.30
 
@@ -130,12 +131,22 @@ else
   bad "skills 下载失败"
 fi
 
-# ---------- 预先下载 Meet U 视频工作室，第一次做视频时不用再等 ----------
+# ---------- Meet U 视频工作室：装成本机的 hyperframes 命令 ----------
+# 装成全局命令后，不管是 AI 照 HyperFrames 文档运行 `hyperframes ...`，还是项目里的 npm run dev，
+# 打开的都是汉化版。--prefix 装在用户目录，不需要管理员权限。
 step "Meet U 视频工作室（中文编辑器）"
-if command -v node >/dev/null 2>&1 && node "$SKILL_DIR/scripts/hf.mjs" --version >/dev/null 2>&1; then
+NPMG="$KIT/npm-global"
+if [ -f "$NPMG/lib/node_modules/hyperframes/NOTICE-MEETU.md" ] && grep -q '"0.8.137-meetu.2"' "$NPMG/lib/node_modules/hyperframes/package.json" 2>/dev/null; then
   ok "已就绪"
+elif command -v npm >/dev/null 2>&1; then
+  npm install -g --prefix "$NPMG" "$HF_PKG" > "$KIT/meetu-install.log" 2>&1
+  if [ -x "$NPMG/bin/hyperframes" ] && [ -f "$NPMG/lib/node_modules/hyperframes/NOTICE-MEETU.md" ]; then
+    ok "已安装为 hyperframes 命令"
+  else
+    bad "安装失败，日志：$KIT/meetu-install.log"
+  fi
 else
-  bad "下载失败"
+  bad "缺少 Node.js，无法安装"
 fi
 
 # ---------- 写入 PATH，以后新开的终端和 AI 工具都能直接找到 ----------
@@ -144,7 +155,7 @@ MARK="# >>> 安杰视频工具包 >>>"
 for rc in "$HOME/.zprofile" "$HOME/.zshrc" "$HOME/.bash_profile"; do
   touch "$rc"
   if ! grep -q "$MARK" "$rc"; then
-    printf '\n%s\nexport PATH="$HOME/.video-kit/bin:$HOME/.video-kit/node/bin:$PATH"\n# <<< 安杰视频工具包 <<<\n' "$MARK" >> "$rc"
+    printf '\n%s\nexport PATH="$HOME/.video-kit/bin:$HOME/.video-kit/npm-global/bin:$HOME/.video-kit/node/bin:$PATH"\n# <<< 安杰视频工具包 <<<\n' "$MARK" >> "$rc"
   fi
 done
 ok "已写入 ~/.zprofile、~/.zshrc、~/.bash_profile"

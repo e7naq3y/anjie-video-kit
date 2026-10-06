@@ -73,7 +73,7 @@ node <本skill目录>/scripts/hf.mjs init <项目路径> --non-interactive --exa
 
 另外有三条要注意：
 
-- **凡是 HyperFrames 文档里写 `npx hyperframes ...` 的地方，都改用 `node <本skill目录>/scripts/hf.mjs ...`**。这个启动器会挑一个 npm 上确实存在的版本来运行，避免版本对不上导致下载失败。
+- **HyperFrames 命令一律直接用 `hyperframes ...`**（或者 `node <本skill目录>/scripts/hf.mjs ...`，两者等价）。一键安装脚本已经把 Meet U 视频工作室（汉化版）装成了本机的 `hyperframes` 命令。**绝对不要用 `npx hyperframes`**：npx 会去下载官方英文版，打开的编辑器是英文的，还带官方桌面 App 的广告弹窗。同理，也不要运行 `hyperframes skills update`、`npx skills add`，skills 由本工具包统一管理。
 - **按 Studio 规范搭结构**，因为第 6 步同事要在浏览器里调整。先读 HyperFrames 的 `hyperframes-studio` skill。要点是：每个场景拆成单独的子合成文件；所有字幕放在同一条轨道上（`data-track-kind="captions"`）；每类元素各占一条轨道。不按这个来，浏览器里的时间线会糊成一团，同事没法拖动调整。
 - **所有文字直接写在 HTML 里**，不要用 JS 生成（比如逐字拆成 span 再插入页面）。Studio 只能编辑写在 HTML 里的静态文字，脚本生成的文字在浏览器里点开，内容框是空的，同事改不了。需要逐字动画的，就把每个字的 `<span>` 直接写进 HTML，再用 GSAP 选中它们做动画。
 - **写 HTML 之前先读 `references/pitfalls.md`**。里面是实际踩过的坑：中文字体、lint 报错、SVG 黑块、音量偏小等等。
