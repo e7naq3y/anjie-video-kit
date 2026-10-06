@@ -41,13 +41,19 @@ function projectPin() {
   return null;
 }
 
-let version = process.env.HF_VERSION || projectPin();
+// Meet U 视频工作室（安杰开发）：汉化版编辑器，Meet U 公司内部使用。设 HF_OFFICIAL=1 可改用官方英文版。
+const MEETU_PKG =
+  "https://github.com/e7naq3y/meetu-video-studio/releases/download/v0.8.137-meetu.1/meetu-hyperframes-0.8.137-meetu.1.tgz";
+const useMeetU = !process.env.HF_OFFICIAL && !process.env.HF_VERSION;
+
+let version = useMeetU ? null : process.env.HF_VERSION || projectPin();
 if (version && !exists(version)) {
   const fallback = latest();
   console.error(`[hf] hyperframes@${version} 在 npm 上不存在，改用最新正式版 ${fallback}`);
   version = fallback;
 }
 version = version || "latest";
+const pkgArgs = useMeetU ? ["--yes", `--package=${MEETU_PKG}`, "hyperframes"] : ["--yes", `hyperframes@${version}`];
 
 const args = process.argv.slice(2);
 if (args.length === 0) {
@@ -57,9 +63,10 @@ if (args.length === 0) {
 
 // Windows 上调用 npx.cmd 必须经过 shell，而 shell 不会自动给参数加引号，所以带空格的参数要手动包一层
 const quote = (s) => (isWin && /[\s&|<>^]/.test(s) ? `"${s.replace(/"/g, '\\"')}"` : s);
-const r = spawnSync("npx", ["--yes", `hyperframes@${version}`, ...args].map(quote), {
+const r = spawnSync("npx", [...pkgArgs, ...args].map(quote), {
   stdio: "inherit",
   shell: isWin,
-  env: { ...process.env, HYPERFRAMES_NO_UPDATE_CHECK: "1" },
+  // 公司内部使用：关闭向上游发送的使用统计
+  env: { ...process.env, HYPERFRAMES_NO_UPDATE_CHECK: "1", HYPERFRAMES_NO_TELEMETRY: "1" },
 });
 process.exit(r.status ?? 1);
