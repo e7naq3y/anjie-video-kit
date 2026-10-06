@@ -8,9 +8,24 @@
 // 想强制指定版本：设环境变量 HF_VERSION=0.8.136
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { join } from "node:path";
 
 const isWin = process.platform === "win32";
+// 一键安装脚本把所有程序装在 ~/.video-kit/，这里主动加进 PATH，
+// 这样即使终端或 AI 工具还没重启、没读到新的 PATH，也能找到它们
+const KIT = join(homedir(), ".video-kit");
+const KIT_PATHS = isWin
+  ? [join(KIT, "bin"), join(KIT, "node")]
+  : [join(KIT, "bin"), join(KIT, "node", "bin")];
+process.env.PATH = [...KIT_PATHS, process.env.PATH].join(isWin ? ";" : ":");
+// 预先下载好的渲染浏览器（国内网络下 HyperFrames 自己下载常常失败）
+const chromeFile = join(KIT, "chrome-path.txt");
+if (!process.env.HYPERFRAMES_BROWSER_PATH && existsSync(chromeFile)) {
+  const p = readFileSync(chromeFile, "utf8").trim();
+  if (p && existsSync(p)) process.env.HYPERFRAMES_BROWSER_PATH = p;
+}
+
 const run = (cmd, args, opts = {}) => spawnSync(cmd, args, { encoding: "utf8", shell: isWin, ...opts });
 
 function exists(version) {

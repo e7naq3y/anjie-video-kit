@@ -24,6 +24,9 @@ import sys
 
 import edge_tts
 
+# 一键安装脚本把 FFmpeg 装在 ~/.video-kit/bin，这里主动加进 PATH，免得终端没重启时找不到
+os.environ["PATH"] = os.pathsep.join([os.path.join(os.path.expanduser("~"), ".video-kit", "bin"), os.environ.get("PATH", "")])
+
 SAMPLE_VOICES = {
     "zh-CN-YunyangNeural": "稳重男声（播音腔）",
     "zh-CN-YunjianNeural": "激昂男声",

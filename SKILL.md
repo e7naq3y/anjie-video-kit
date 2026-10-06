@@ -36,10 +36,10 @@ description: 安杰视频工具包（安杰出品）：公司内部做视频的�
 node <本skill目录>/scripts/check_env.mjs
 ```
 
-它会逐项报告 Node、Python、FFmpeg、edge-tts 配音、HyperFrames skills 是否就绪，并给出缺什么、怎么装。
+它会逐项报告 Node、FFmpeg、uv、edge-tts 配音、渲染用浏览器、HyperFrames skills 是否就绪。
 
-- 如果连 `node` 都运行不了，说明 Node 还没装，直接看 `references/install.md` 从头装。
-- 缺了什么，就按 `references/install.md` 里对应系统的步骤装好，再跑一次检查，确认全部通过。
+- 有缺项，或者连 `node` 都运行不了，就运行一键安装脚本补齐，具体命令见本目录的 `INSTALL.md` 第 3 步（Mac：`scripts/bootstrap-mac.sh`；Windows：`scripts/bootstrap-windows.ps1`）。脚本不需要管理员密码，已装好的会跳过。**执行时把超时设到 15 分钟**。
+- 不要改用 Homebrew、winget、`sudo`：你执行命令时没有地方输入密码，一定会卡住。原因和排查办法见 `references/install.md`。
 - 刚装完 HyperFrames skills 时，需要对方重启一次 AI 工具。重启前，先把已经问到的需求记进项目目录的 `BRIEF.md`，重启后接着做，不用重新问。
 
 ## 第 2 步：问清楚要什么
@@ -64,7 +64,7 @@ node <本skill目录>/scripts/hf.mjs init <项目路径> --non-interactive --exa
 - **稿子**：对方只给了主题或要点，你先写稿，给对方确认后再往下做。稿子里有投资收益、医疗功效、"保证""第一"这类说法时，用一句话提醒可能有合规风险，问要不要改，最后听对方的。
 - **中文 AI 配音**：用 `scripts/tts_zh.py`。它会逐句生成配音，同时记录每个词的时间点，后面字幕和画面就靠这些时间点对齐。用法见脚本开头的注释。拿不准用哪个声音，就先用 `--sample` 生成试听给对方挑。
 - **英文配音**：用 HyperFrames 自带的 `hf.mjs tts`。
-- **对方自己录的音频**：放进 `assets/`，需要逐词时间就用 `hf.mjs transcribe`（需要 whisper-cpp，装法见 install.md）。
+- **对方自己录的音频**：放进 `assets/`，需要逐词时间就用 `hf.mjs transcribe`（需要 whisper-cpp，见 `references/install.md` 的"可选组件"）。
 - **背景音乐、图标、图片**：交给 HyperFrames 的 `media-use` skill。
 
 ## 第 4 步：交给 HyperFrames 制作
